@@ -1,3 +1,4 @@
+package com.oneid.rp;
 
 import it.sauronsoftware.base64.Base64;
 import java.io.IOException;
