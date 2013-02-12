@@ -1,6 +1,6 @@
 package com.oneid.rp;
 
-import it.sauronsoftware.base64.Base64;
+import org.apache.commons.codec.binary.Base64; 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -23,7 +23,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
  *
  * @author acer
  */
-public class OneId {
+public class OneID {
 
     public static String oneidServers = "";
     public static String oneidServer = "https://keychain" + oneidServers + ".oneid.com";
@@ -34,7 +34,7 @@ public class OneId {
     public String oneidApiId = "";
     public String oneidApiKey = "";
 
-    public OneId() {
+    public OneID() {
 // Load key file
         JSONObject json = jsonDecode("api_key" + oneidServers + ".json");
         oneidApiId = json.getString("API_ID");
@@ -48,7 +48,7 @@ public class OneId {
     public JSONObject callOneID(String method, String post) {
         try {
             String scope = "";
-            String encoding = Base64.encode(oneidApiId + ":" + oneidApiKey);
+            String encoding = Base64.encodeBase64String(new String(oneidApiId + ":" + oneidApiKey).getBytes());
             HttpPost httpPost = new HttpPost(oneidServer + scope + "/" + method);
             httpPost.setHeader("Authorization", "Basic " + encoding);
             HttpClient client = new DefaultHttpClient();
@@ -57,7 +57,7 @@ public class OneId {
             HttpResponse response = client.execute(httpPost);
             return jsonDecode(response.getEntity().getContent());
         } catch (Exception ex) {
-            Logger.getLogger(OneId.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(OneID.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
@@ -70,11 +70,11 @@ public class OneId {
     public JSONObject jsonDecode(String jsonFile) {
         JSONObject json = null;
         try {
-            InputStream is = OneId.class.getResourceAsStream(jsonFile);
+            InputStream is = OneID.class.getResourceAsStream(jsonFile);
             String jsonTxt = IOUtils.toString(is);
             json = (JSONObject) JSONSerializer.toJSON(jsonTxt);
         } catch (IOException ex) {
-            Logger.getLogger(OneId.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(OneID.class.getName()).log(Level.SEVERE, null, ex);
         }
         return json;
     }
@@ -85,7 +85,7 @@ public class OneId {
             String jsonTxt = IOUtils.toString(is);
             json = (JSONObject) JSONSerializer.toJSON(jsonTxt);
         } catch (IOException ex) {
-            Logger.getLogger(OneId.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(OneID.class.getName()).log(Level.SEVERE, null, ex);
         }
         return json;
     }
