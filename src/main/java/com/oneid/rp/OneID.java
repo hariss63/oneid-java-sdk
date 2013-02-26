@@ -1,18 +1,18 @@
 package com.oneid.rp;
 
-import org.apache.commons.codec.binary.Base64; 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
+
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 /*
@@ -20,128 +20,109 @@ import org.apache.http.impl.client.DefaultHttpClient;
  * and open the template in the editor.
  */
 /**
- *
+ * 
  * @author acer
  */
 public class OneID {
 
-    public static String oneidServers = "";
-    public static String oneidServer = "https://keychain" + oneidServers + ".oneid.com";
-    public String oneidSscript = "<script src=\"https://api" + oneidServers + "oneid.com/js/includeexternal.js type=\"text/javascript\"></script>";
-    public String oneidFormScript = "<script src=\"https://api" + oneidServers + ".oneid.com/form/form.js\" type=\"text/javascript\"></script>";
-// Set your values here
-    public String oneidReferralCode = "yyy";
-    public String oneidApiId = "";
-    public String oneidApiKey = "";
+	public static String oneidServers = "-dev";
+	public static String oneidServer = "https://keychain" + oneidServers + ".oneid.com";
+	public String oneidSscript = "<script src=\"https://api" + oneidServers + "oneid.com/js/includeexternal.js type=\"text/javascript\"></script>";
+	public String oneidFormScript = "<script src=\"https://api" + oneidServers + ".oneid.com/form/form.js\" type=\"text/javascript\"></script>";
 
-    public OneID() {
-// Load key file
-        JSONObject json = jsonDecode("api_key" + oneidServers + ".json");
-        oneidApiId = json.getString("API_ID");
-        oneidApiKey = json.getString("API_KEY");
-    }
+	public String oneidReferralCode = "yyy";
+	public String oneidApiId = "";
+	public String oneidApiKey = "";
 
-//    public static void main(String[] args) {
-//        System.out.println(new OneId().oneIDFormFill());
-//    }
+	public OneID(String apiID, String apiKey) {
+		oneidApiId = apiID;
+		oneidApiKey = apiKey;
+	}
 
-    public JSONObject callOneID(String method, String post) {
-        try {
-            String scope = "";
-            String encoding = Base64.encodeBase64String(new String(oneidApiId + ":" + oneidApiKey).getBytes());
-            HttpPost httpPost = new HttpPost(oneidServer + scope + "/" + method);
-            httpPost.setHeader("Authorization", "Basic " + encoding);
-            HttpClient client = new DefaultHttpClient();
-            // client.getCredentialsProvider().setCredentials(new AuthScope("https://keychain.oneid.com",443), new UsernamePasswordCredentials(oneidApiId, oneidApiKey));
+	public JSONObject callOneID(String method, String post) throws IOException {
+		String scope = "";
+		System.out.println(oneidApiId + ":" + oneidApiKey);
+		String encoding = Base64.encodeBase64URLSafeString(String.valueOf(oneidApiId + ":" + oneidApiKey).getBytes());
+		String url = oneidServer + scope + "/keychain/" + method;
+		HttpPost httpPost = new HttpPost(url);
+		httpPost.setEntity(new StringEntity(post));
+		httpPost.addHeader("Authorization", "Basic " + encoding);
+		HttpClient client = new DefaultHttpClient();
 
-            HttpResponse response = client.execute(httpPost);
-            return jsonDecode(response.getEntity().getContent());
-        } catch (Exception ex) {
-            Logger.getLogger(OneID.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
-    }
+		HttpResponse response = client.execute(httpPost);
+		String resultString = IOUtils.toString(response.getEntity().getContent());
+		System.out.println("XXXXX");
+		System.out.println(url);
+		System.out.println(encoding);
+		System.out.println("XXXXX");
+		System.out.println(resultString);
+		System.out.println("XXXXX");
+		JSONObject result = (JSONObject) JSONSerializer.toJSON(resultString);
+		return result;
+	}
 
-    public void oneIdSetCredentials(String apiId, String apiKey) {
-        oneidApiId = apiId;
-        oneidApiKey = apiKey;
-    }
+	public void oneIdSetCredentials(String apiId, String apiKey) {
+		oneidApiId = apiId;
+		oneidApiKey = apiKey;
+	}
 
-    public JSONObject jsonDecode(String jsonFile) {
-        JSONObject json = null;
-        try {
-            InputStream is = OneID.class.getResourceAsStream(jsonFile);
-            String jsonTxt = IOUtils.toString(is);
-            json = (JSONObject) JSONSerializer.toJSON(jsonTxt);
-        } catch (IOException ex) {
-            Logger.getLogger(OneID.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return json;
-    }
+	private String jsonEncode(Map<String, String> jsonMap) {
+		JSONObject json = new JSONObject();
+		json.accumulateAll(jsonMap);
+		return json.toString();
+	}
 
-    public JSONObject jsonDecode(InputStream is) {
-        JSONObject json = null;
-        try {
-            String jsonTxt = IOUtils.toString(is);
-            json = (JSONObject) JSONSerializer.toJSON(jsonTxt);
-        } catch (IOException ex) {
-            Logger.getLogger(OneID.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return json;
-    }
+	public String createSignInButton(String callback) throws OneIDException {
+		return "<img class=\"oneidlogin\" id=\"oneidlogin\" data-challenge='{\"nonce\":\"" + makeNonce() + "\",\"attr\":\"personal_info[email]\",\"callback\":\"" + callback + "\"}' src=\"https://api" + oneidServers + ".oneid.com/images/oneid_signin.png\" onclick=\"OneId.login()\">";
+	}
 
-    public String jsonEncode(Map<String, String> jsonMap) {
-        JSONObject json = new JSONObject();
-        json.accumulateAll(jsonMap);
-        return json.toString();
-    }
+	public String createFormFillButton() {
+		return "<img class=\"oneidlogin\" id=\"oneidlogin\" src=\"https://api" + oneidServers + ".oneid.com/api/images/btn_id_signin.gif\" onclick=\"OneId.login()\">";
+	}
 
-    public String oneIDButton(String callback) {
-        return "<img class=\"oneidlogin\" id=\"oneidlogin\" data-challenge='{\"nonce\":\"" + oneIDMakeNonce() + "\",\"attr\":\"personal_info[email]\",\"callback\":\"" + callback + "\"}' src=\"https://api" + oneidServers + ".oneid.com/images/oneid_signin.png\" onclick=\"OneId.login()\">";
-    }
+	public String redirect(String page, JSONObject response) {
+		return ("{\"error\":\"" + response.getString("error") + "\",\"errorcode\":\"" + response.getString("errorcode") + "\",\"url\":\"" + page + "\",\"response\":" + response.toString() + "}");
+	}
 
-    public String oneIDFormFill() {
-        return "<img class=\"oneidlogin\" id=\"oneidlogin\" src=\"https://api" + oneidServers + ".oneid.com/api/images/btn_id_signin.gif\" onclick=\"OneId.login()\">";
-    }
+	public String createProvisionButton(String emailAddress, Map<String, String> attrs) {
 
-    public String oneIDRedirect(String page, JSONObject response) {
-        return ("{\"error\":\""
-                + response.getString("error")
-                + "\",\"errorcode\":\""
-                + response.getString("errorcode")
-                + "\",\"url\":\""
-                + page
-                + "\",\"response\":"
-                + response.toString()
-                + "}");
-    }
+		return "<img id=\"getAOneIdButton\" class=\"oneidlogin\"ref=" + oneidReferralCode + "src=\"https://api" + oneidServers + "oneid.com/images/oneid_signin.png\" data-userattrs = '" + jsonEncode(attrs) + " 'onclick=\"OneId.createOneId()\" >";
+	}
 
-    public String OneIDProvision(String emailAddress, Map<String, String> attrs) {
+	private boolean checkSuccess(JSONObject response) {
+		return "success".equals(response.getString("error")) && 0 == response.getInt("errorcode");
+	}
 
-        return "<img id=\"getAOneIdButton\" class=\"oneidlogin\"ref=" + oneidReferralCode + "src=\"https://api" + oneidServers + "oneid.com/images/oneid_signin.png\" data-userattrs = '" + jsonEncode(attrs) + " 'onclick=\"OneId.createOneId()\" >";
-    }
+	public String makeNonce() throws OneIDException {
+		try {
+			JSONObject json = callOneID("make_nonce", null);
+			return json.getString("nonce");
+		} catch (IOException e) {
+			throw new OneIDException("HTTP call to make_nonce failed: " + e.toString(), -1);
+		}
+	}
 
-    public String oneIDIsSuccess(JSONObject response) {
-        return response.getString("errorcode");
-    }
+	public Map<String, Object> validateResponse(String inputString) throws OneIDException {
 
-    public String oneIDMakeNonce() {
-        JSONObject json = callOneID("make_nonce", null);
-        return json.getString("nonce");
-    }
-
-    public Map oneIDResponse(String inputString) {
-
-        JSONObject validate = callOneID("validate", inputString);
-        if (oneIDIsSuccess(validate) == null) 
-        {
-            validate.accumulate("failed", "failed");
-            return validate;
-        }
-
-        JSONObject arr = jsonDecode(inputString);
-        arr.accumulate("errorcode", validate.get("errorcode"));
-        arr.accumulate("error", validate.get("error"));
-        return arr;
-    }
+		try {
+			JSONObject validate = callOneID("validate", inputString);
+			if (!checkSuccess(validate)) {
+				throw new OneIDException(validate.getString("error"), validate.getInt("errorcode"));
+			}
+	
+			JSONObject inputJSON = (JSONObject) JSONSerializer.toJSON(inputString);
+			Map<String, Object> result = new HashMap<String, Object>();
+			for (String key : result.keySet()) {
+				result.put(key, inputJSON.get(key));
+			}
+			return result;
+		} catch (IOException e) {
+			throw new OneIDException("HTTP call to validate failed: " + e.toString(), -1);
+		}
+	}
+	
+	public static void main (String [] args) throws Exception {
+		OneID oneid = new OneID("f7eea656-46c8-478d-8fb0-e2e9d005d045","nj/uZhJgrk61/deO7fzXXA==");
+		oneid.validateResponse("{}");
+	}
 }
