@@ -35,14 +35,23 @@ public class OneID {
 	public String oneidApiKey = "";
 
 	public OneID(String apiID, String apiKey) {
-		oneidApiId = apiID;
-		oneidApiKey = apiKey;
+		this(apiID, apiKey, "");
 	}
+
+    public OneID(String apiID, String apiKey, String serversFlag){
+        oneidApiId = apiID;
+        oneidApiKey = apiKey;
+        oneidServers = serversFlag;
+		oneidServer = "https://keychain" + oneidServers + ".oneid.com";
+
+    }
 
 	public JSONObject callOneID(String method, String post) throws IOException {
 		String scope = "";
 		System.out.println(oneidApiId + ":" + oneidApiKey);
-		String encoding = Base64.encodeBase64URLSafeString(String.valueOf(oneidApiId + ":" + oneidApiKey).getBytes());
+//		String encoding = Base64.encodeBase64URLSafeString(String.valueOf(oneidApiId + ":" + oneidApiKey).getBytes());
+		String basic = oneidApiId + ":" + oneidApiKey;
+		String encoding = Base64.encodeBase64String(basic.getBytes());
 		String url = oneidServer + scope + "/keychain/" + method;
 		HttpPost httpPost = new HttpPost(url);
 		httpPost.setEntity(new StringEntity(post));
