@@ -1,4 +1,4 @@
-package com.oneid.rp;
+package com.oneid.rp.twofactor;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -7,7 +7,7 @@ import junit.framework.TestSuite;
 /**
  * Unit test for simple App.
  */
-public class OneIDTest 
+public class OneID2FClientTest 
     extends TestCase
 {
     /**
@@ -15,7 +15,7 @@ public class OneIDTest
      *
      * @param testName name of the test case
      */
-    public OneIDTest( String testName )
+    public OneID2FClientTest( String testName )
     {
         super( testName );
     }
@@ -25,7 +25,7 @@ public class OneIDTest
      */
     public static Test suite()
     {
-        return new TestSuite( OneIDTest.class );
+        return new TestSuite( OneID2FClientTest.class );
     }
 
     /**
