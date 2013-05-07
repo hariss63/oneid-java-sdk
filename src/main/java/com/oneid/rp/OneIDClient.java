@@ -26,8 +26,16 @@ public class OneIDClient {
 	private String apiID;
 	private String apiKey;
 
-	private static final String ONEID_HOST = "https://keychain-stage.oneid.com/";
+	private static final String ONEID_HOST = "https://keychain.oneid.com/";
 
+	/**
+     * Constructor - API Credentials are required
+     * 
+     * Can be retrieved from https://keychain.oneid.com/register
+     * 
+     * @param apiKey
+     * @param apiID
+     */
 	public OneIDClient(String apiKey, String apiID) {
 		this.apiID = apiID;
 		this.apiKey = apiKey;
@@ -51,15 +59,34 @@ public class OneIDClient {
 		return result;
 	}
 
+	/**
+	 * Checks whether a OneID authentication was successfully verified.
+	 * 
+	 * @param response - a JSONObject representing a OneID authentication payload
+	 * @return boolean - true if validated, false if validation failed
+	 */
 	public boolean isValidated(JSONObject response) {
 		return "success".equals(response.getString("error")) && 0 == response.getInt("errorcode");
 	}
 
+	/**
+	 * Create a OneID-formatted nonce
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
 	public String nonce() throws IOException {
 		JSONObject json = open("make_nonce");
 		return json.getString("nonce");
 	}
 
+	/**
+	 * Validate a OneID authentication payload
+	 * 
+	 * @param payload - a String representing a OneID authentication payload
+	 * @return
+	 * @throws IOException - throws an IOException if an HTTP connection can't be opened
+	 */
 	@SuppressWarnings("unchecked")
 	public OneIDResponse validate(String payload) throws IOException {
 		JSONObject validate = open("validate", payload);

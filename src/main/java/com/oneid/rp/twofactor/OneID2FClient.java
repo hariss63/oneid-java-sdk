@@ -27,8 +27,16 @@ public class OneID2FClient
     
     private OneIDClient oneIDClient = null;
     
-    private static final String ONEID_HOST = "https://account-stage.oneid.com/repo/send_2fa";
+    private static final String ONEID_HOST = "https://account.oneid.com/repo/send_2fa";
     
+    /**
+     * Constructor - API Credentials are required
+     * 
+     * Can be retrieved from https://keychain.oneid.com/register
+     * 
+     * @param apiKey
+     * @param apiID
+     */
     public OneID2FClient(String apiKey, String apiID) {
     	this.apiID = apiID;
     	this.apiKey = apiKey;
@@ -36,6 +44,16 @@ public class OneID2FClient
     	oneIDClient = new OneIDClient(apiKey, apiID);
     }
     
+    /**
+     * Trigger a second factor request using the OneID Remote App.
+     * 
+     * @param twoFactorToken - the two_factor_token value from a user's authentication payload during linking 
+     * @param uid - the uid value from a user's authentication payload during linking
+     * @param title - Title for the second factor request 
+     * @param message - Message for the second factor request
+     * @return
+     * @throws IOException - throws an IOException if an HTTP connection can't be opened
+     */
     public OneIDResponse send(String twoFactorToken, String uid, String title, String message) throws IOException {
 	    	JSONObject obj = new JSONObject();
 	    	obj.put("title", title);
