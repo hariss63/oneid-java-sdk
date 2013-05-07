@@ -6,6 +6,12 @@ package com.oneid.rp;
 import java.util.Map;
 
 /**
+ * OneID Response result
+ * 
+ * valid - true: the request validated, false: the request did NOT validate
+ * response - the server response if the request did not validate
+ * result - any other keys resulting from the validation (used for linking accounts) 
+ * 
  * @author jgoldberg
  *
  */
