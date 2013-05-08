@@ -23,8 +23,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
  */
 public class OneIDClient {
 
-	private String apiID;
-	private String apiKey;
+	protected String apiID;
+	protected String apiKey;
 
 	private static final String ONEID_HOST = "https://keychain.oneid.com/";
 
@@ -87,15 +87,13 @@ public class OneIDClient {
 	 * @return
 	 * @throws IOException - throws an IOException if an HTTP connection can't be opened
 	 */
-	@SuppressWarnings("unchecked")
 	public OneIDResponse validate(String payload) throws IOException {
 		JSONObject validate = open("validate", payload);
 		if (!isValidated(validate))
 			return new OneIDResponse(false, validate.getString("error"), null);
 
 		JSONObject inputJSON = (JSONObject) JSONSerializer.toJSON(payload);
-		Map<String, Object> result = (Map<String, Object>) JSONObject.toBean(inputJSON, Map.class);
 
-		return new OneIDResponse(true, null, result);
+		return new OneIDResponse(true, null, inputJSON);
 	}
 }

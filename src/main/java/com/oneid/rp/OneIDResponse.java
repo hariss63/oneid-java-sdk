@@ -5,6 +5,10 @@ package com.oneid.rp;
 
 import java.util.Map;
 
+import javax.management.monitor.StringMonitor;
+
+import net.sf.json.JSONObject;
+
 /**
  * OneID Response result
  * 
@@ -17,20 +21,20 @@ import java.util.Map;
  */
 public class OneIDResponse {
 	
-	private Map<String, Object> result;
+	private JSONObject result;
 	private boolean valid;
 	private String response;
 	
-	public OneIDResponse(boolean valid, String response, Map<String, Object> result) {
+	public OneIDResponse(boolean valid, String response, JSONObject result) {
 		this.valid = valid;
 		this.result = result;
 		this.response = response;
 	}
 	
-	public Map<String, Object> getResult() {
+	public JSONObject getResult() {
 		return result;
 	}
-	public void setResult(Map<String, Object> result) {
+	public void setResult(JSONObject result) {
 		this.result = result;
 	}
 	public boolean isValid() {
@@ -48,4 +52,36 @@ public class OneIDResponse {
 		this.response = response;
 	}
 	
+	/**
+	 * Checks to see if the OneID auth payload has a device signature 
+	 * 
+	 * @param response - the OneID auth payload JSON
+	 * @return
+	 */
+	public boolean hasADSignature() {
+		if (!result.containsKey("nonces")) return false;
+		return result.getJSONObject("nonces").containsKey("ad");
+	}
+	
+	/**
+	 * Checks to see if the OneID auth payload has a mobile device signature 
+	 * 
+	 * @param response - the OneID auth payload JSON
+	 * @return
+	 */
+	public boolean hasCDSignature() {
+		if (!result.containsKey("nonces")) return false;
+		return result.getJSONObject("nonces").containsKey("cd");
+	}
+	
+	/**
+	 * Checks to see if the OneID auth payload has a OneID server signature 
+	 * 
+	 * @param response - the OneID auth payload JSON
+	 * @return
+	 */
+	public boolean hasRepoSignature() {
+		if (!result.containsKey("nonces")) return false;
+		return result.getJSONObject("nonces").containsKey("repo");
+	}
 }
