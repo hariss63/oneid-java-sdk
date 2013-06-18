@@ -4,8 +4,8 @@
 package com.oneid.rp;
 
 import java.io.IOException;
-import java.util.Map;
 
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 
@@ -47,7 +47,8 @@ public class OneIDClient {
 
 	public JSONObject open(String method, String post) throws IOException {
 		String basic = apiID + ":" + apiKey;
-		String encoding = Base64.encodeBase64String(basic.getBytes());
+		String encoding = new String(Base64.encodeBase64(basic.getBytes(), false));
+		
 		HttpPost httpPost = new HttpPost(ONEID_HOST + method);
 		httpPost.setEntity(new StringEntity(post));
 		httpPost.addHeader("Authorization", "Basic " + encoding);
@@ -55,6 +56,7 @@ public class OneIDClient {
 
 		HttpResponse response = client.execute(httpPost);
 		String resultString = IOUtils.toString(response.getEntity().getContent());
+		
 		JSONObject result = (JSONObject) JSONSerializer.toJSON(resultString);
 		return result;
 	}
@@ -92,8 +94,12 @@ public class OneIDClient {
 		if (!isValidated(validate))
 			return new OneIDResponse(false, validate.getString("error"), null);
 
-		JSONObject inputJSON = (JSONObject) JSONSerializer.toJSON(payload);
-
-		return new OneIDResponse(true, null, inputJSON);
+		try {
+			JSONObject inputJSON = (JSONObject) JSONSerializer.toJSON(payload);
+			return new OneIDResponse(true, null, inputJSON);
+		} catch (JSONException e) {
+		}
+		
+		return new OneIDResponse(false, payload, null);
 	}
 }
