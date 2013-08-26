@@ -53,10 +53,11 @@ public class OneID2FClient extends OneIDClient {
 	 * @throws IOException
 	 *             - throws an IOException if an HTTP connection can't be opened
 	 */
-	public OneIDResponse send(String twoFactorToken, String uid, String title, String message) throws IOException {
+	public OneIDResponse send(String twoFactorToken, String nonce, String uid, String title, String message) throws IOException {
 		JSONObject obj = new JSONObject();
 		obj.put("title", title);
 		obj.put("message", message);
+		obj.put("nonce", nonce);
 		obj.put("two_factor_token", twoFactorToken);
 		String input = obj.toString();
 
@@ -82,7 +83,7 @@ public class OneID2FClient extends OneIDClient {
 
 	public static void main(String[] args) throws Exception {
 		OneID2FClient client = new OneID2FClient("PDlKwQNiKLYfYOxyfD+RoQ==", "43d4b408-f1b8-4212-a303-52c86cbec8a2");
-		OneIDResponse r = client.send("5anR6Zila+GWWYikXF4Uhw==", "KaTUyUUWoAn7ajRmWKjIFw==", "Test Tile", "Test Message");
+		OneIDResponse r = client.send("5anR6Zila+GWWYikXF4Uhw==", client.nonce(), "KaTUyUUWoAn7ajRmWKjIFw==", "Test Tile", "Test Message");
 		System.out.println(r.hasADSignature());
 		System.out.println(r.hasCDSignature());
 		System.out.println(r.hasRepoSignature());

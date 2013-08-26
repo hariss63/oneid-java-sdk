@@ -42,7 +42,7 @@ public class OneIDClient {
 	}
 
 	public JSONObject open(String method) throws IOException {
-		return open(method, null);
+		return open(method, "{}");
 	}
 
 	public JSONObject open(String method, String post) throws IOException {
