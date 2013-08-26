@@ -35,6 +35,27 @@ public class OneID2FClient extends OneIDClient {
 	public OneID2FClient(String apiKey, String apiID) {
 		super(apiKey, apiID);
 	}
+	
+	/**
+	 * Trigger a second factor request using the OneID Remote App.
+	 * 
+	 * @param twoFactorToken
+	 *            - the two_factor_token value from a user's authentication
+	 *            payload during linking
+	 * @param uid
+	 *            - the uid value from a user's authentication payload during
+	 *            linking
+	 * @param title
+	 *            - Title for the second factor request
+	 * @param message
+	 *            - Message for the second factor request
+	 * @return
+	 * @throws IOException
+	 *             - throws an IOException if an HTTP connection can't be opened
+	 */
+	public OneIDResponse send(String twoFactorToken, String uid, String title, String message) throws IOException {
+		return send(twoFactorToken, nonce(), uid, title, message);
+	}
 
 	/**
 	 * Trigger a second factor request using the OneID Remote App.
@@ -42,6 +63,8 @@ public class OneID2FClient extends OneIDClient {
 	 * @param twoFactorToken
 	 *            - the two_factor_token value from a user's authentication
 	 *            payload during linking
+	 * @param nonce
+	 *            - the nonce which gets signed during the authentication transaction 
 	 * @param uid
 	 *            - the uid value from a user's authentication payload during
 	 *            linking
@@ -83,7 +106,7 @@ public class OneID2FClient extends OneIDClient {
 
 	public static void main(String[] args) throws Exception {
 		OneID2FClient client = new OneID2FClient("PDlKwQNiKLYfYOxyfD+RoQ==", "43d4b408-f1b8-4212-a303-52c86cbec8a2");
-		OneIDResponse r = client.send("5anR6Zila+GWWYikXF4Uhw==", client.nonce(), "KaTUyUUWoAn7ajRmWKjIFw==", "Test Tile", "Test Message");
+		OneIDResponse r = client.send("5anR6Zila+GWWYikXF4Uhw==", "KaTUyUUWoAn7ajRmWKjIFw==", "Test Tile", "Test Message");
 		System.out.println(r.hasADSignature());
 		System.out.println(r.hasCDSignature());
 		System.out.println(r.hasRepoSignature());
