@@ -85,7 +85,8 @@ public class OneID2FClient extends OneIDClient {
 		String input = obj.toString();
 
 		String basic = super.apiID + ":" + super.apiKey;
-		String encoding = Base64.encodeBase64String(basic.getBytes());
+		//String encoding = Base64.encodeBase64String(basic.getBytes());
+                String encoding = new String(Base64.encodeBase64(basic.getBytes(), false));
 		HttpPost httpPost = new HttpPost(ONEID_HOST);
 		httpPost.setEntity(new StringEntity(input));
 		httpPost.addHeader("Authorization", "Basic " + encoding);
